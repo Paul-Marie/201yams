@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+
+import  sys
+import  math
+
+def     man_help():
+    print("USAGE")
+    print("\t./201yams d1 d2 d3 d4 d5 c\n")
+    print("DESCRIPTION")
+    print("\td1\tvalue of the first die (0 if not thrown)")
+    print("\td2\tvalue of the second die (0 if not thrown)")
+    print("\td3\tvalue of the third die (0 if not thrown)")
+    print("\td4\tvalue of the fourth die (0 if not thrown)")
+    print("\td5\tvalue of the fifth die (0 if not thrown)")
+    print("\tc\texpected combination")
+
+def     get_number(char, mode = 0):
+    try:
+        nbr = int(char)
+    except:
+        raise Exception("the dice's result should only be between 1 and 6 (0 if not thrown)\n")
+    if mode == 1:
+        if nbr > 6 or nbr <= 0:
+            raise Exception("Hey! you are not playing to Role Play Game!\n")
+    if nbr > 6 or nbr < 0:
+        raise Exception("Hey! you are not playing to Role Play Game!\n")
+    return nbr
+
+def     get_binomial(a, b):
+    try:
+        result = (math.factorial(a) / (math.factorial(b) * math.factorial(a - b))) * pow((1 / 6), b) * pow((5 / 6), (a - b))
+    except:
+        raise Exception("Error :(\n")
+    return result
+
+def     get_number_apparition(nb):
+    apparition = 0
+    if d1 == nb:
+        apparition += 1
+    if d2 == nb:
+        apparition += 1
+    if d3 == nb:
+        apparition += 1
+    if d4 == nb:
+        apparition += 1
+    if d5 == nb:
+        apparition += 1
+    return apparition
+
+def     get_result(dice, number):
+    result = 0.0
+    apparition = get_number_apparition(number)
+    if dice < apparition:
+        result = 1
+    else:
+        for n in range(dice - apparition, 6 - apparition):
+            result += get_binomial(5 - apparition, n)
+    return result * 100
+
+def     get_straight(number):
+    tab = set()
+    tab.update([d1, d2, d3, d4, d5])
+    if len(tab) == 1:
+        tab.add(0)
+    pres = 6
+    if tab.issuperset([number]):
+        pres = 5
+    if tab.issuperset([0]):
+        result = math.factorial(pres - int(len(tab))) / pow(6, pres - int(len(tab)))
+    else:
+        result = math.factorial(pres - int(len(tab))) / pow(6, pres - int(len(tab)))
+    return result * 100
+
+def     get_full(number1, number2):
+    result = 1.0
+    apparition1 = get_number_apparition(number1)
+    apparition2 = get_number_apparition(number2)
+    if (apparition1 > 3):
+        apparition1 = 3
+    if (apparition2 > 2):
+        apparition2 = 2
+    for n in range(5 - apparition1 - apparition2, 6 - apparition1 - apparition2):
+        result *= get_binomial(5 - apparition1 - apparition2, n)
+    if result > 0.1:
+        result = 0.1
+    return result * 1000
+
+def     compute_result(string):
+    arg = string.split('_')
+    combination = arg[0]
+    if len(arg) == 2:
+        number = get_number(arg[1], 1)
+        print("chances to get a " + str(number) + " " + combination, end='')
+        if combination == "pair":
+            result = get_result(2, number)
+        elif combination == "three":
+            result = get_result(3, number)
+            print("-of-a-kind", end='')
+        elif combination == "four":
+            result = get_result(4, number)
+            print("-of-a-kind", end='')
+        elif combination == "yams":
+            result = get_result(5, number)
+        elif combination == "straight":
+            result = get_straight(number)
+        else:
+            raise Exception("invalid combination\n")
+        print(":  " + "%.2f" % result + "%")
+    elif len(arg) == 3:
+        if combination == "full":
+            number1 = get_number(arg[1], 1)
+            number2 = get_number(arg[2], 1)
+            result = get_full(number1, number2)
+        else:
+            raise Exception("only combination 'full' need 2 excepted value\n")
+        print("chances to get a " + str(number1) + " full of "
+              + str(number2) + ":  " + "%.2f" % result + "%")
+    else:
+        raise Exception("invalid combination\n")
+
+try:
+    if len(sys.argv) == 2:
+        if sys.argv[1] == "-h":
+            man_help()
+            exit(0)
+    elif len(sys.argv) == 7:
+        result = 0.0
+        combination = ""
+        d1 = get_number(sys.argv[1])
+        d2 = get_number(sys.argv[2])
+        d3 = get_number(sys.argv[3])
+        d4 = get_number(sys.argv[4])
+        d5 = get_number(sys.argv[5])
+        compute_result(sys.argv[6])
+    else:
+        raise Exception("Invalid number of argument\n")
+except Exception as error:
+    sys.stdout.write(str(error))
+    exit(84)
